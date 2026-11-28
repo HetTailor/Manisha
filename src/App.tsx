@@ -3,20 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { NavigationProvider, useNavigation } from './context/NavigationContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
-import { QuoteModal } from './components/QuoteModal';
 import { HomePage } from './pages/HomePage';
-import { AboutPage } from './pages/AboutPage';
-import { ServicesPage } from './pages/ServicesPage';
-import { PortfolioPage } from './pages/PortfolioPage';
-import { ContactPage } from './pages/ContactPage';
 import { EASE_STUDIO } from './components/MotionPrimitives';
 import { BRAND } from './data/content';
+
+const AboutPage = lazy(() => import('./pages/AboutPage').then((m) => ({ default: m.AboutPage })));
+const ServicesPage = lazy(() => import('./pages/ServicesPage').then((m) => ({ default: m.ServicesPage })));
+const PortfolioPage = lazy(() => import('./pages/PortfolioPage').then((m) => ({ default: m.PortfolioPage })));
+const ContactPage = lazy(() => import('./pages/ContactPage').then((m) => ({ default: m.ContactPage })));
+const QuoteModal = lazy(() => import('./components/QuoteModal').then((m) => ({ default: m.QuoteModal })));
+
+function PageLoader() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center pt-24">
+      <div className="w-7 h-7 rounded-full border-2 border-[#C99A50]/30 border-t-[#FF0000] animate-spin" aria-label="Loading page" />
+    </div>
+  );
+}
 
 function AppContent() {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
@@ -35,7 +44,7 @@ function AppContent() {
   };
 
   return (
-    <div className={`min-h-screen ${theme.bgCanvas} ${theme.textBody} font-sans antialiased relative selection:bg-[#FF0000] selection:text-white transition-colors duration-500 flex flex-col justify-between`}>
+    <div className={`min-h-screen ${theme.bgCanvas} ${theme.textBody} font-sans antialiased relative overflow-x-clip selection:bg-[#FF0000] selection:text-white transition-colors duration-500 flex flex-col justify-between`}>
       
       {/* 1. Global Navigation Bar */}
       <Navbar onOpenQuoteModal={handleOpenDefaultQuote} />
@@ -50,34 +59,36 @@ function AppContent() {
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.34, ease: EASE_STUDIO }}
           >
-            {currentRoute === 'home' && (
-              <HomePage
-                onOpenQuoteModal={handleOpenDefaultQuote}
-                onSelectServiceForQuote={handleSelectServiceForQuote}
-              />
-            )}
+            <Suspense fallback={<PageLoader />}>
+              {currentRoute === 'home' && (
+                <HomePage
+                  onOpenQuoteModal={handleOpenDefaultQuote}
+                  onSelectServiceForQuote={handleSelectServiceForQuote}
+                />
+              )}
 
-            {currentRoute === 'about' && (
-              <AboutPage onOpenQuoteModal={handleOpenDefaultQuote} />
-            )}
+              {currentRoute === 'about' && (
+                <AboutPage onOpenQuoteModal={handleOpenDefaultQuote} />
+              )}
 
-            {currentRoute === 'services' && (
-              <ServicesPage
-                onOpenQuoteModal={handleOpenDefaultQuote}
-                onSelectServiceForQuote={handleSelectServiceForQuote}
-              />
-            )}
+              {currentRoute === 'services' && (
+                <ServicesPage
+                  onOpenQuoteModal={handleOpenDefaultQuote}
+                  onSelectServiceForQuote={handleSelectServiceForQuote}
+                />
+              )}
 
-            {currentRoute === 'portfolio' && (
-              <PortfolioPage
-                onOpenQuoteModal={handleOpenDefaultQuote}
-                onSelectServiceForQuote={handleSelectServiceForQuote}
-              />
-            )}
+              {currentRoute === 'portfolio' && (
+                <PortfolioPage
+                  onOpenQuoteModal={handleOpenDefaultQuote}
+                  onSelectServiceForQuote={handleSelectServiceForQuote}
+                />
+              )}
 
-            {currentRoute === 'contact' && (
-              <ContactPage />
-            )}
+              {currentRoute === 'contact' && (
+                <ContactPage />
+              )}
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </main>
@@ -116,11 +127,15 @@ function AppContent() {
       </motion.aside>
 
       {/* Instant Estimation & Quote Calculator Modal */}
-      <QuoteModal
-        isOpen={isQuoteModalOpen}
-        onClose={() => setIsQuoteModalOpen(false)}
-        preselectedServiceId={preselectedServiceId}
-      />
+      {isQuoteModalOpen && (
+        <Suspense fallback={null}>
+          <QuoteModal
+            isOpen={isQuoteModalOpen}
+            onClose={() => setIsQuoteModalOpen(false)}
+            preselectedServiceId={preselectedServiceId}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

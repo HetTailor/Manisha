@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Mail, Phone, Clock, Send, CheckCircle2, ChevronDown } from 'lucide-react';
+import { Mail, Phone, Clock, Send, CheckCircle2, ChevronDown, AlertCircle, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ManishaLogo } from '../components/ManishaLogo';
+import { BRAND } from '../data/content';
 import {
   Reveal,
   MaskedTextReveal,
@@ -10,26 +11,62 @@ import {
   EASE_STUDIO,
 } from '../components/MotionPrimitives';
 
-export const ContactPage: React.FC = () => {
-  const [form, setForm] = useState({
-    name: '',
-    company: '',
-    email: '',
-    phone: '',
-    service: 'Stationery & Printing',
-    quantity: '1000 – 2500',
-    artworkStatus: 'Print-Ready PDF with Outlines',
-    message: '',
-  });
+const INITIAL_FORM = {
+  name: '',
+  company: '',
+  email: '',
+  phone: '',
+  service: 'Stationery & Corporate Printing',
+  quantity: '1000 – 2500 (Offset Economy)',
+  artworkStatus: 'Print-Ready PDF with Outlines',
+  message: '',
+};
 
+export const ContactPage: React.FC = () => {
+  const [form, setForm] = useState(INITIAL_FORM);
+  const [formError, setFormError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
+  const updateField = <K extends keyof typeof INITIAL_FORM>(key: K, value: (typeof INITIAL_FORM)[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    if (formError) setFormError('');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.phone) return;
+    setFormError('');
+
+    if (form.name.trim().length < 2) {
+      setFormError('Please enter your full name.');
+      return;
+    }
+
+    const cleanedPhone = form.phone.replace(/[\s\-\(\)]/g, '').replace(/^(\+91|91|0)/, '');
+    if (!/^[6-9]\d{9}$/.test(cleanedPhone)) {
+      setFormError('Please enter a valid 10-digit Indian mobile number (e.g. 98765 43210).');
+      return;
+    }
+
+    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setFormError('Please enter a valid email address or leave the email field blank.');
+      return;
+    }
+
     setIsSubmitted(true);
   };
+
+  const whatsappInquiryUrl = `https://wa.me/${BRAND.contact.whatsapp}?text=${encodeURIComponent(
+    `*New Inquiry from Manisha Graphix Website*\n\n` +
+      `*Name:* ${form.name.trim()}\n` +
+      (form.company.trim() ? `*Company:* ${form.company.trim()}\n` : '') +
+      `*Phone:* ${form.phone.trim()}\n` +
+      (form.email.trim() ? `*Email:* ${form.email.trim()}\n` : '') +
+      `*Service:* ${form.service}\n` +
+      `*Estimated Quantity:* ${form.quantity}\n` +
+      `*Artwork Status:* ${form.artworkStatus}\n` +
+      (form.message.trim() ? `*Notes:* ${form.message.trim()}` : '')
+  )}`;
 
   const faqs = [
     {
@@ -89,6 +126,7 @@ export const ContactPage: React.FC = () => {
             
             {/* Left Column: Studio Details & Channels */}
             <div className="lg:col-span-5 space-y-6">
+              <h2 className="sr-only">Studio Contact Details</h2>
               
               {/* Studio Card */}
               <Reveal direction="right" distance={24} className="p-8 rounded-3xl bg-[#000000] text-white border border-neutral-800 shadow-xl space-y-6">
@@ -209,6 +247,8 @@ export const ContactPage: React.FC = () => {
                 {isSubmitted ? (
                   <motion.div
                     key="contact-submitted"
+                    role="status"
+                    aria-live="polite"
                     initial={{ opacity: 0, scale: 0.97, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.97, y: -10 }}
@@ -224,30 +264,34 @@ export const ContactPage: React.FC = () => {
                       <CheckCircle2 className="w-8 h-8" />
                     </motion.div>
                     <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Inquiry Received Successfully!</h3>
-                    <p className="text-xs text-neutral-700 dark:text-neutral-300 max-w-md mx-auto leading-relaxed">
+                    <p className="text-xs sm:text-sm text-neutral-700 dark:text-neutral-300 max-w-md mx-auto leading-relaxed">
                       Thank you, <span className="font-bold">{form.name}</span>. Harshil Mistry and our prepress estimation team have received your specifications for <span className="font-bold">{form.service}</span>. We will contact you at <span className="font-bold">{form.phone}</span> shortly.
                     </p>
-                    <motion.button
-                      whileHover={{ y: -1 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ duration: 0.22, ease: EASE_STUDIO }}
-                      onClick={() => {
-                        setIsSubmitted(false);
-                        setForm({
-                          name: '',
-                          company: '',
-                          email: '',
-                          phone: '',
-                          service: 'Stationery & Printing',
-                          quantity: '1000 – 2500',
-                          artworkStatus: 'Print-Ready PDF with Outlines',
-                          message: '',
-                        });
-                      }}
-                      className="inline-block px-6 py-2.5 rounded-full bg-[#000000] dark:bg-white text-white dark:text-neutral-950 text-xs font-mono font-bold uppercase transition-colors duration-300 hover:bg-[#FF0000] dark:hover:bg-[#FF0000] dark:hover:text-white cursor-pointer"
-                    >
-                      Submit Another Inquiry
-                    </motion.button>
+                    <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                      <a
+                        href={whatsappInquiryUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#C99A50] hover:bg-[#B0833D] text-white text-xs font-mono font-bold uppercase transition-colors duration-300"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        <span>Send via WhatsApp</span>
+                      </a>
+                      <motion.button
+                        type="button"
+                        whileHover={{ y: -1 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ duration: 0.22, ease: EASE_STUDIO }}
+                        onClick={() => {
+                          setIsSubmitted(false);
+                          setFormError('');
+                          setForm(INITIAL_FORM);
+                        }}
+                        className="inline-block px-6 py-2.5 rounded-full bg-[#000000] dark:bg-white text-white dark:text-neutral-950 text-xs font-mono font-bold uppercase transition-colors duration-300 hover:bg-[#FF0000] dark:hover:bg-[#FF0000] dark:hover:text-white cursor-pointer"
+                      >
+                        Submit Another Inquiry
+                      </motion.button>
+                    </div>
                   </motion.div>
                 ) : (
                   <motion.form
@@ -257,31 +301,52 @@ export const ContactPage: React.FC = () => {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.25 }}
                     onSubmit={handleSubmit}
+                    noValidate
                     className="space-y-4"
                   >
+                  <AnimatePresence>
+                    {formError && (
+                      <motion.div
+                        role="alert"
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.22, ease: EASE_STUDIO }}
+                        className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-xs text-[#D60000] dark:text-red-300 font-sans"
+                      >
+                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#FF0000]" />
+                        <span>{formError}</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
+                      <label htmlFor="contact-name" className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
                         Your Full Name *
                       </label>
                       <input
+                        id="contact-name"
                         type="text"
                         required
+                        autoComplete="name"
                         value={form.name}
-                        onChange={e => setForm({ ...form, name: e.target.value })}
+                        onChange={e => updateField('name', e.target.value)}
                         placeholder="e.g. Rajesh Sharma"
                         className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000] bg-neutral-50/50 dark:bg-[#0f0f18]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
+                      <label htmlFor="contact-company" className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
                         Company / Brand (Optional)
                       </label>
                       <input
+                        id="contact-company"
                         type="text"
+                        autoComplete="organization"
                         value={form.company}
-                        onChange={e => setForm({ ...form, company: e.target.value })}
+                        onChange={e => updateField('company', e.target.value)}
                         placeholder="e.g. Apex Biotech"
                         className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000] bg-neutral-50/50 dark:bg-[#0f0f18]"
                       />
@@ -290,27 +355,32 @@ export const ContactPage: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
+                      <label htmlFor="contact-phone" className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
                         Mobile Number *
                       </label>
                       <input
+                        id="contact-phone"
                         type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
                         required
                         value={form.phone}
-                        onChange={e => setForm({ ...form, phone: e.target.value })}
+                        onChange={e => updateField('phone', e.target.value)}
                         placeholder="+91 98765 00000"
                         className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000] bg-neutral-50/50 dark:bg-[#0f0f18] font-mono"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
+                      <label htmlFor="contact-email" className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
                         Email Address
                       </label>
                       <input
+                        id="contact-email"
                         type="email"
+                        autoComplete="email"
                         value={form.email}
-                        onChange={e => setForm({ ...form, email: e.target.value })}
+                        onChange={e => updateField('email', e.target.value)}
                         placeholder="rajesh@example.com"
                         className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000] bg-neutral-50/50 dark:bg-[#0f0f18]"
                       />
@@ -319,12 +389,13 @@ export const ContactPage: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
+                      <label htmlFor="contact-service" className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
                         Required Service Line
                       </label>
                       <select
+                        id="contact-service"
                         value={form.service}
-                        onChange={e => setForm({ ...form, service: e.target.value })}
+                        onChange={e => updateField('service', e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-[#FF0000] bg-neutral-50/50 dark:bg-[#0f0f18] font-medium"
                       >
                         <option value="Stationery & Corporate Printing">Stationery & Corporate Identity</option>
@@ -336,12 +407,13 @@ export const ContactPage: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
+                      <label htmlFor="contact-quantity" className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
                         Estimated Run Quantity
                       </label>
                       <select
+                        id="contact-quantity"
                         value={form.quantity}
-                        onChange={e => setForm({ ...form, quantity: e.target.value })}
+                        onChange={e => updateField('quantity', e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-[#FF0000] bg-neutral-50/50 dark:bg-[#0f0f18] font-mono"
                       >
                         <option value="100 – 500 (Digital Short Run)">100 – 500 Units (Digital Run)</option>
@@ -353,12 +425,13 @@ export const ContactPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
+                    <label htmlFor="contact-artwork" className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
                       Artwork & File Readiness
                     </label>
                     <select
+                      id="contact-artwork"
                       value={form.artworkStatus}
-                      onChange={e => setForm({ ...form, artworkStatus: e.target.value })}
+                      onChange={e => updateField('artworkStatus', e.target.value)}
                       className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-[#FF0000] bg-neutral-50/50 dark:bg-[#0f0f18] font-medium"
                     >
                       <option value="Print-Ready PDF with Outlines">I have print-ready PDF/AI files with bleed</option>
@@ -368,13 +441,14 @@ export const ContactPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
+                    <label htmlFor="contact-message" className="block text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
                       Project Details, Paper Specs & Notes
                     </label>
                     <textarea
+                      id="contact-message"
                       rows={4}
                       value={form.message}
-                      onChange={e => setForm({ ...form, message: e.target.value })}
+                      onChange={e => updateField('message', e.target.value)}
                       placeholder="Specify sizes (e.g. 3.5x2 inches, A4), paper preference (Matte, Gloss, Textured, Velvet), foil colors, or deadline..."
                       className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#FF0000] bg-neutral-50/50 dark:bg-[#0f0f18]"
                     />

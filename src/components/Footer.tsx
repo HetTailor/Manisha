@@ -19,6 +19,7 @@ export const Footer: React.FC = () => {
           {/* Col 1: Logo & Tagline */}
           <StaggerItem className="space-y-4">
             <motion.button
+              type="button"
               whileHover={{ opacity: 0.9 }}
               whileTap={{ scale: 0.985 }}
               transition={{ duration: 0.2 }}
@@ -26,7 +27,7 @@ export const Footer: React.FC = () => {
               className="focus:outline-none cursor-pointer text-left"
               aria-label="Manisha Graphix Home"
             >
-              <ManishaLogo variant="dark" size="lg" showTagline={true} showText={true} />
+              <ManishaLogo variant="dark" size="lg" showTagline={true} showText={true} priority={false} />
             </motion.button>
             
             <p className="text-xs text-neutral-400 font-sans leading-relaxed max-w-sm">
@@ -101,16 +102,16 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar: Copyright & Footer Nav Links */}
         <Reveal delay={0.14} distance={14} className="pt-8 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-neutral-400">
           <div>
-            © 2025 Manisha Graphix. All Rights Reserved.
+            © {new Date().getFullYear()} Manisha Graphix. All Rights Reserved.
           </div>
 
-          <div className="flex items-center gap-6">
-            <button onClick={() => navigate('home')} className="hover:text-white transition-colors duration-250 link-underline-glide cursor-pointer">Home</button>
-            <button onClick={() => navigate('about')} className="hover:text-white transition-colors duration-250 link-underline-glide cursor-pointer">About</button>
-            <button onClick={() => navigate('services')} className="hover:text-white transition-colors duration-250 link-underline-glide cursor-pointer">Services</button>
-            <button onClick={() => navigate('portfolio')} className="hover:text-white transition-colors duration-250 link-underline-glide cursor-pointer">Portfolio</button>
-            <button onClick={() => navigate('contact')} className="hover:text-white transition-colors duration-250 link-underline-glide cursor-pointer">Contact</button>
-          </div>
+          <nav aria-label="Footer Navigation" className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <button type="button" onClick={() => navigate('home')} className="hover:text-white transition-colors duration-250 link-underline-glide cursor-pointer">Home</button>
+            <button type="button" onClick={() => navigate('about')} className="hover:text-white transition-colors duration-250 link-underline-glide cursor-pointer">About</button>
+            <button type="button" onClick={() => navigate('services')} className="hover:text-white transition-colors duration-250 link-underline-glide cursor-pointer">Services</button>
+            <button type="button" onClick={() => navigate('portfolio')} className="hover:text-white transition-colors duration-250 link-underline-glide cursor-pointer">Portfolio</button>
+            <button type="button" onClick={() => navigate('contact')} className="hover:text-white transition-colors duration-250 link-underline-glide cursor-pointer">Contact</button>
+          </nav>
         </Reveal>
 
       </div>

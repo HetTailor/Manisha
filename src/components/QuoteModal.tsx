@@ -308,6 +308,21 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
     }
   }, [preselectedServiceId]);
 
+  // Close modal on Escape key and prevent background scroll while open
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   const toggleFinish = (id: string) => {
     setSelectedFinishes((prev) =>
       prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
@@ -562,6 +577,9 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
       {isOpen && (
         <motion.div
           key="quote-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="quote-modal-title"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -587,7 +605,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
                   <Calculator className="w-3.5 h-3.5" />
                   <span>Instant Estimator & Enquiry</span>
                 </div>
-                <h3 className={`text-xl sm:text-2xl font-display font-extrabold ${isLight ? 'text-slate-950' : 'text-white'}`}>
+                <h3 id="quote-modal-title" className={`text-xl sm:text-2xl font-display font-extrabold ${isLight ? 'text-slate-950' : 'text-white'}`}>
                   Request a Custom Print Quote
                 </h3>
                 <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-neutral-400'} mt-0.5`}>

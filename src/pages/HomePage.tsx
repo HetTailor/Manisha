@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowRight, Calendar, Folder, Award, Smile, Clock } from 'lucide-react';
+import { ArrowRight, Calendar, Folder, Award, Smile, Clock, CheckCircle2, MessageSquare } from 'lucide-react';
 import { Hero } from '../components/Hero';
+import { BRAND } from '../data/content';
 import {
   Reveal,
   MaskedTextReveal,
@@ -26,19 +27,21 @@ export const HomePage: React.FC<HomePageProps> = ({
   const { navigate } = useNavigation();
   const [mobileNumber, setMobileNumber] = useState('');
   const [mobileError, setMobileError] = useState('');
+  const [submittedMobile, setSubmittedMobile] = useState<string | null>(null);
 
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const cleaned = mobileNumber.replace(/[\s\-\(\)]/g, '');
     const normalized = cleaned.replace(/^(\+91|91|0)/, '');
-    
+
     if (!/^[6-9]\d{9}$/.test(normalized)) {
       setMobileError('Please enter a valid 10-digit Indian mobile number (e.g. 98765 43210).');
       return;
     }
-    
-    // Clear validation error; ready for future backend integration
+
     setMobileError('');
+    setSubmittedMobile(`+91 ${normalized.slice(0, 5)} ${normalized.slice(5)}`);
+    setMobileNumber('');
   };
 
   // 5 Process Steps
@@ -771,44 +774,105 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           {/* Form */}
           <Reveal delay={0.2} distance={14} className="pt-2">
-            <form onSubmit={handleContactSubmit} className="max-w-md mx-auto space-y-2" noValidate>
-              <div className="flex flex-col sm:flex-row items-center gap-3">
-                <div className="relative w-full">
-                  <input
-                    type="tel"
-                    value={mobileNumber}
-                    onChange={(e) => {
-                      setMobileNumber(e.target.value);
-                      if (mobileError) setMobileError('');
-                    }}
-                    placeholder="Enter your mobile number"
-                    className="w-full bg-[#FFFFFF] dark:bg-[#161622] border border-neutral-300 dark:border-neutral-700 rounded-full px-5 py-3 text-xs sm:text-sm text-[#111111] dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000] transition-[border-color,box-shadow,background-color] duration-250 shadow-sm"
-                  />
-                </div>
-                <motion.button
-                  whileHover={{ y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.22, ease: EASE_STUDIO }}
-                  type="submit"
-                  className="w-full sm:w-auto px-7 py-3 rounded-full bg-[#FF0000] hover:bg-[#D60000] text-white text-xs font-mono font-bold uppercase tracking-wider transition-[background-color,box-shadow] duration-300 shadow-md shadow-red-600/20 hover:shadow-lg hover:shadow-red-600/30 shrink-0 cursor-pointer"
+            <AnimatePresence mode="wait">
+              {submittedMobile ? (
+                <motion.div
+                  key="home-contact-success"
+                  role="status"
+                  aria-live="polite"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.28, ease: EASE_STUDIO }}
+                  className="max-w-md mx-auto p-5 rounded-2xl bg-neutral-50 dark:bg-[#161622] border border-[#C99A50]/55 text-center space-y-3 shadow-sm"
                 >
-                  Submit
-                </motion.button>
-              </div>
-              <AnimatePresence>
-                {mobileError && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.22, ease: EASE_STUDIO }}
-                    className="text-xs text-[#FF0000] font-sans text-center sm:text-left pl-3 pt-1"
-                  >
-                    {mobileError}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </form>
+                  <div className="w-10 h-10 rounded-full bg-[#FF0000]/10 text-[#FF0000] flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                  <p className="text-xs sm:text-sm font-sans text-neutral-800 dark:text-neutral-200 leading-relaxed">
+                    Thank you! We received your callback number{' '}
+                    <strong className="font-mono text-neutral-950 dark:text-white">{submittedMobile}</strong>. Our studio team will connect with you shortly.
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
+                    <a
+                      href={`https://wa.me/${BRAND.contact.whatsapp}?text=${encodeURIComponent(
+                        `Hello Manisha Graphix, I just shared my mobile number (${submittedMobile}) on your website and would like to discuss a design or printing project.`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#C99A50] hover:bg-[#B0833D] text-white text-xs font-mono font-bold transition-colors duration-250"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>Chat on WhatsApp</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => setSubmittedMobile(null)}
+                      className="px-4 py-2 rounded-full bg-neutral-200/80 dark:bg-neutral-800 hover:bg-neutral-300/80 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 text-xs font-mono font-semibold transition-colors duration-250 cursor-pointer"
+                    >
+                      Share Another Number
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.form
+                  key="home-contact-form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onSubmit={handleContactSubmit}
+                  className="max-w-md mx-auto space-y-2"
+                  noValidate
+                >
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <div className="relative w-full">
+                      <label htmlFor="home-mobile-input" className="sr-only">
+                        Mobile Number
+                      </label>
+                      <input
+                        id="home-mobile-input"
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        value={mobileNumber}
+                        aria-invalid={Boolean(mobileError)}
+                        aria-describedby={mobileError ? 'home-mobile-error' : undefined}
+                        onChange={(e) => {
+                          setMobileNumber(e.target.value);
+                          if (mobileError) setMobileError('');
+                        }}
+                        placeholder="Enter your mobile number"
+                        className="w-full bg-[#FFFFFF] dark:bg-[#161622] border border-neutral-300 dark:border-neutral-700 rounded-full px-5 py-3 text-xs sm:text-sm text-[#111111] dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000] transition-[border-color,box-shadow,background-color] duration-250 shadow-sm"
+                      />
+                    </div>
+                    <motion.button
+                      whileHover={{ y: -1 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.22, ease: EASE_STUDIO }}
+                      type="submit"
+                      className="w-full sm:w-auto px-7 py-3 rounded-full bg-[#FF0000] hover:bg-[#D60000] text-white text-xs font-mono font-bold uppercase tracking-wider transition-[background-color,box-shadow] duration-300 shadow-md shadow-red-600/20 hover:shadow-lg hover:shadow-red-600/30 shrink-0 cursor-pointer"
+                    >
+                      Submit
+                    </motion.button>
+                  </div>
+                  <AnimatePresence>
+                    {mobileError && (
+                      <motion.p
+                        id="home-mobile-error"
+                        role="alert"
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.22, ease: EASE_STUDIO }}
+                        className="text-xs text-[#FF0000] font-sans text-center sm:text-left pl-3 pt-1"
+                      >
+                        {mobileError}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </motion.form>
+              )}
+            </AnimatePresence>
           </Reveal>
 
         </div>

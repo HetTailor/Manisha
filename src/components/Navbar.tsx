@@ -24,6 +24,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuoteModal }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    const handleResize = () => {
+      if (window.innerWidth >= 768) setMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [mobileMenuOpen]);
+
   const navLinks: { id: RouteId; label: string }[] = [
     { id: 'home', label: 'Home' },
     { id: 'about', label: 'About' },
@@ -51,25 +67,31 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuoteModal }) => {
         
         {/* Brand Logo with Transparent Background */}
         <motion.button
+          type="button"
           whileHover={{ opacity: 0.9 }}
           whileTap={{ scale: 0.985 }}
           transition={{ duration: 0.2, ease: EASE_STUDIO }}
-          onClick={() => navigate('home')}
-          className="inline-flex items-center shrink-0 bg-transparent focus:outline-none cursor-pointer text-left"
+          onClick={() => {
+            navigate('home');
+            setMobileMenuOpen(false);
+          }}
+          className="inline-flex items-center shrink-0 bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF0000] rounded-lg cursor-pointer text-left"
           aria-label="Manisha Graphix Home"
         >
           <ManishaLogo variant={isLight ? 'light' : 'dark'} size="md" showTagline={false} />
         </motion.button>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
+        <nav aria-label="Primary Navigation" className="hidden md:flex items-center gap-8 text-sm font-semibold">
           {navLinks.map((link) => {
             const isActive = currentRoute === link.id;
             return (
               <button
                 key={link.id}
+                type="button"
+                aria-current={isActive ? 'page' : undefined}
                 onClick={() => navigate(link.id)}
-                className={`relative py-1 transition-colors duration-250 cursor-pointer ${
+                className={`relative py-1 transition-colors duration-250 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FF0000] rounded-xs ${
                   isActive
                     ? 'text-[#FF0000] font-bold'
                     : isLight 
@@ -166,11 +188,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuoteModal }) => {
           </motion.button>
 
           <motion.button
+            type="button"
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.16, ease: EASE_STUDIO }}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className={`p-2 rounded-lg ${isLight ? 'text-neutral-800 hover:bg-neutral-100' : 'text-neutral-200 hover:bg-white/10'} transition-colors duration-200 cursor-pointer`}
-            aria-label="Open menu"
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </motion.button>
@@ -184,7 +208,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuoteModal }) => {
       {/* Mobile Drawer Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
+          <motion.nav
+            aria-label="Mobile Navigation"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -195,6 +220,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuoteModal }) => {
               {navLinks.map((link, idx) => (
                 <motion.button
                   key={link.id}
+                  type="button"
+                  aria-current={currentRoute === link.id ? 'page' : undefined}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.035, duration: 0.28, ease: EASE_STUDIO }}
@@ -202,7 +229,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuoteModal }) => {
                     navigate(link.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`py-2 px-3 rounded-lg text-left transition-colors duration-200 cursor-pointer ${
+                  className={`py-2.5 px-3 rounded-lg text-left transition-colors duration-200 cursor-pointer ${
                     currentRoute === link.id
                       ? isLight ? 'bg-[#C99A50]/15 text-[#FF0000] border-l-3 border-[#C99A50] font-bold' : 'bg-[#C99A50]/20 text-[#FF0000] border-l-3 border-[#C99A50] font-bold'
                       : isLight ? 'text-neutral-700 hover:bg-neutral-50' : 'text-neutral-300 hover:bg-white/5'
@@ -213,6 +240,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuoteModal }) => {
               ))}
 
               <motion.button
+                type="button"
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.16, duration: 0.28, ease: EASE_STUDIO }}
@@ -227,7 +255,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenQuoteModal }) => {
                 <ArrowRight className="w-4 h-4 transition-transform duration-250 group-hover:translate-x-1" />
               </motion.button>
             </div>
-          </motion.div>
+          </motion.nav>
         )}
       </AnimatePresence>
     </motion.header>

@@ -19,6 +19,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   onSelectServiceForQuote,
 }) => {
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   const services = [
     {
@@ -130,37 +131,45 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           </div>
 
           {/* Category Filter Tabs */}
-          <Reveal immediate delay={0.24} distance={12} className="mt-8 sm:mt-10 flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800">
-            {[
-              { id: 'all', label: 'All Services' },
-              { id: 'stationery', label: 'Stationery' },
-              { id: 'wedding', label: 'Wedding Cards' },
-              { id: 'pharma', label: 'Pharmaceutical' },
-              { id: 'books', label: 'Book Work' },
-            ].map(tab => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative px-4 py-2 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-colors duration-250 cursor-pointer whitespace-nowrap shrink-0 ${
-                    isActive
-                      ? 'text-white'
-                      : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white'
-                  }`}
-                >
-                  {isActive && (
-                    <motion.span
-                      layoutId="services-active-filter"
-                      transition={{ duration: 0.34, ease: EASE_STUDIO }}
-                      className="absolute inset-0 rounded-full bg-[#FF0000] shadow-md shadow-red-600/20"
-                    />
-                  )}
-                  <span className="relative z-10">{tab.label}</span>
-                </button>
-              );
-            })}
+          <Reveal immediate delay={0.24} distance={12}>
+            <div
+              role="tablist"
+              aria-label="Filter printing services by category"
+              className="mt-8 sm:mt-10 flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800"
+            >
+              {[
+                { id: 'all', label: 'All Services' },
+                { id: 'stationery', label: 'Stationery' },
+                { id: 'wedding', label: 'Wedding Cards' },
+                { id: 'pharma', label: 'Pharmaceutical' },
+                { id: 'books', label: 'Book Work' },
+              ].map(tab => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative px-4 py-2 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-colors duration-250 cursor-pointer whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF0000] ${
+                      isActive
+                        ? 'text-white'
+                        : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="services-active-filter"
+                        transition={{ duration: 0.34, ease: EASE_STUDIO }}
+                        className="absolute inset-0 rounded-full bg-[#FF0000] shadow-md shadow-red-600/20"
+                      />
+                    )}
+                    <span className="relative z-10">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </Reveal>
         </div>
       </section>
@@ -189,12 +198,28 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   {/* Service Imagery */}
                   <div className="lg:col-span-5 relative bg-neutral-900 overflow-hidden aspect-[1199/1028] lg:aspect-auto lg:h-full">
                     <ImageReveal className="w-full h-full lg:absolute lg:inset-0">
-                      <img
-                        src={service.image}
-                        alt={service.title}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                      />
+                      {!failedImages[service.id] ? (
+                        <img
+                          src={service.image}
+                          width={1199}
+                          height={1028}
+                          loading={index === 0 ? 'eager' : 'lazy'}
+                          fetchPriority={index === 0 ? 'high' : 'auto'}
+                          decoding="async"
+                          onError={() =>
+                            setFailedImages((prev) => ({ ...prev, [service.id]: true }))
+                          }
+                          alt={`${service.title} — Manisha Graphix printing showcase`}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center p-6 text-center bg-neutral-950 text-neutral-300">
+                          <span className="text-xs font-mono uppercase tracking-wider text-[#C99A50]">
+                            {service.title}
+                          </span>
+                        </div>
+                      )}
                     </ImageReveal>
                     <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
                       <span className="px-3 py-1 rounded-full bg-black/75 backdrop-blur-xs text-white text-[11px] font-mono font-bold">
@@ -285,10 +310,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       <section className="py-12 sm:py-14 lg:py-16 bg-[#000000] text-white border-y border-neutral-800">
         <Reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
-            <h3 className="text-xl font-bold uppercase">Have custom print dimensions or unique artwork?</h3>
+            <h2 className="text-xl font-bold uppercase">Have custom print dimensions or unique artwork?</h2>
             <p className="text-xs text-neutral-400 mt-1">Our estimators calculate exact paper yield and plate costs within 15 minutes.</p>
           </div>
           <motion.button
+            type="button"
             whileHover={{ y: -1.5 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.24, ease: EASE_STUDIO }}

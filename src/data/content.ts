@@ -19,9 +19,9 @@ export const BRAND = {
   contact: {
     phone: '+91 97268 03078',
     whatsapp: '919726803078',
-    email: 'info@manishagraphix.com',
-    hours: 'Mon – Sat: 9:30 AM – 8:00 PM',
-    address: 'Commercial Press Complex, Industrial Estate, Gujarat, India',
+    email: 'manishagraphix@gmail.com',
+    hours: 'Mon – Sat: 9:30 AM – 8:30 PM',
+    address: 'Yuvraj Advantage Here, Vadodara, Gujarat',
   },
 };
 

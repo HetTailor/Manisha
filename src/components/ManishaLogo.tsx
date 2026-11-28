@@ -5,6 +5,7 @@ interface ManishaLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   showTagline?: boolean;
   showText?: boolean;
+  priority?: boolean;
   className?: string;
 }
 
@@ -13,6 +14,7 @@ export const ManishaLogo: React.FC<ManishaLogoProps> = ({
   size = 'md',
   showTagline = false,
   showText = false,
+  priority = true,
   className = '',
 }) => {
   const isLight = variant === 'light';
@@ -33,15 +35,19 @@ export const ManishaLogo: React.FC<ManishaLogoProps> = ({
           !isLight ? 'bg-white/95 px-2.5 py-1 rounded-xl shadow-sm ring-1 ring-white/15' : 'bg-transparent'
         }`}
       >
-        <img
-          src="/assets/manisha-graphix-header-logo.png"
-          alt="MANISHA GRAPHIX"
-          width="1527"
-          height="652"
-          className={`${logoHeight} w-auto max-w-full object-contain block`}
-          loading="eager"
-          fetchPriority="high"
-        />
+        <picture>
+          <source srcSet="/assets/manisha-graphix-header-logo.webp" type="image/webp" />
+          <img
+            src="/assets/manisha-graphix-header-logo.png"
+            alt="MANISHA GRAPHIX — Graphic Design & Printing Studio"
+            width={1527}
+            height={652}
+            className={`${logoHeight} w-auto max-w-full object-contain block`}
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
+            decoding="async"
+          />
+        </picture>
       </div>
 
       {showText && showTagline && (

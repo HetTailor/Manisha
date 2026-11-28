@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Eye, X, Image as ImageIcon } from 'lucide-react';
+import { ArrowRight, Eye, X, Image as ImageIcon, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigation } from '../context/NavigationContext';
+import { BRAND } from '../data/content';
 import {
   Reveal,
   MaskedTextReveal,
@@ -86,6 +87,7 @@ const PortfolioImage: React.FC<PortfolioImageProps> = ({
         <img
           src={safeSrc}
           alt={alt}
+          decoding="async"
           referrerPolicy="no-referrer"
           onLoad={() => setIsLoaded(true)}
           onError={() => setHasError(true)}
@@ -105,8 +107,11 @@ const PortfolioImage: React.FC<PortfolioImageProps> = ({
       <img
         src={safeSrc}
         alt={alt}
+        width={800}
+        height={600}
         loading={index < 3 ? 'eager' : 'lazy'}
         fetchPriority={index === 0 ? 'high' : 'auto'}
+        decoding="async"
         referrerPolicy="no-referrer"
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
@@ -654,6 +659,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({
 
       {/* 2. Portfolio Gallery Grid */}
       <section className="py-14 sm:py-18 lg:py-20 bg-[#fafafa] dark:bg-[#09090e] relative z-10 border-b border-neutral-200/80 dark:border-neutral-800 transition-colors duration-300">
+        <h2 className="sr-only">Portfolio Projects</h2>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatePresence mode="wait">
             <motion.div
@@ -667,6 +673,13 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({
               {filteredItems.map((item, idx) => (
                 <motion.article
                   key={item.id}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedItem(item);
+                    }
+                  }}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={VIEWPORT_ONCE}
@@ -677,7 +690,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({
                   }}
                   whileHover={{ y: -4, transition: { duration: 0.28, ease: EASE_STUDIO } }}
                   onClick={() => setSelectedItem(item)}
-                  className="group cursor-pointer rounded-2xl overflow-hidden border border-neutral-200/90 dark:border-neutral-800 bg-white dark:bg-[#14141e] hover:border-[#C99A50]/80 transition-[border-color,box-shadow,background-color] duration-350 flex flex-col justify-between hover:shadow-[0_20px_44px_-16px_rgba(0,0,0,0.14)] dark:hover:shadow-[0_20px_44px_-16px_rgba(0,0,0,0.55)] shadow-xs h-full"
+                  className="group cursor-pointer rounded-2xl overflow-hidden border border-neutral-200/90 dark:border-neutral-800 bg-white dark:bg-[#14141e] hover:border-[#C99A50]/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF0000] transition-[border-color,box-shadow,background-color] duration-350 flex flex-col justify-between hover:shadow-[0_20px_44px_-16px_rgba(0,0,0,0.14)] dark:hover:shadow-[0_20px_44px_-16px_rgba(0,0,0,0.55)] shadow-xs h-full"
                 >
                   <div className="flex flex-col flex-1">
                     {/* Original Project Image Container (Uncropped) */}
@@ -856,20 +869,34 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({
                     <strong className="text-neutral-950 dark:text-white">{selectedItem.categoryLabel}</strong>
                   </div>
 
-                  <motion.button
-                    type="button"
-                    whileHover={{ y: -1.5 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ duration: 0.24, ease: EASE_STUDIO }}
-                    onClick={() => {
-                      setSelectedItem(null);
-                      onSelectServiceForQuote(selectedItem.serviceId);
-                    }}
-                    className="group px-6 py-2.5 rounded-full bg-[#FF0000] hover:bg-[#D60000] text-white text-xs font-mono font-bold uppercase transition-[background-color,box-shadow] duration-300 shadow-md shadow-red-600/25 hover:shadow-lg hover:shadow-red-600/35 flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-                  >
-                    <span>Request Similar Project</span>
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
-                  </motion.button>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <a
+                      href={`https://wa.me/${BRAND.contact.whatsapp}?text=${encodeURIComponent(
+                        `Hello Manisha Graphix, I would like to inquire about a project similar to "${selectedItem.title}" (${selectedItem.categoryLabel}).`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2.5 rounded-full bg-[#C99A50] hover:bg-[#B0833D] text-white text-xs font-mono font-bold uppercase transition-colors duration-300 flex items-center gap-1.5 whitespace-nowrap"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </a>
+
+                    <motion.button
+                      type="button"
+                      whileHover={{ y: -1.5 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.24, ease: EASE_STUDIO }}
+                      onClick={() => {
+                        setSelectedItem(null);
+                        onSelectServiceForQuote(selectedItem.serviceId);
+                      }}
+                      className="group px-6 py-2.5 rounded-full bg-[#FF0000] hover:bg-[#D60000] text-white text-xs font-mono font-bold uppercase transition-[background-color,box-shadow] duration-300 shadow-md shadow-red-600/25 hover:shadow-lg hover:shadow-red-600/35 flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                    >
+                      <span>Request Similar Project</span>
+                      <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                    </motion.button>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -885,13 +912,13 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6"
         >
           <div>
-            <h3 className="text-xl font-bold uppercase">Have a unique sample you want replicated?</h3>
+            <h2 className="text-xl font-bold uppercase">Have a unique sample you want replicated?</h2>
             <p className="text-xs text-neutral-400 mt-1">
               Bring your physical sample to our Vadodara studio for exact paper and ink matching.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <motion.button
               type="button"
               whileHover={{ y: -1.5 }}

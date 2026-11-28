@@ -113,7 +113,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenQuoteModal }) => {
 
 
   return (
-    <div className="bg-[#fcfcfd] dark:bg-[#09090e] text-neutral-900 dark:text-neutral-100 min-h-screen pt-20 lg:pt-24 pb-16 sm:pb-20 transition-colors duration-300">
+    <div className="bg-[#fcfcfd] dark:bg-[#09090e] text-neutral-900 dark:text-neutral-100 min-h-screen pt-20 lg:pt-24 transition-colors duration-300">
       
       {/* 1. Page Header with Editorial Style */}
       <section className="border-b border-neutral-200/90 dark:border-neutral-800 bg-white dark:bg-[#0c0c12] py-12 sm:py-14 lg:py-16 relative overflow-hidden transition-colors duration-300">
@@ -165,11 +165,18 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenQuoteModal }) => {
               <div className="rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-md relative group">
                 <SubtleParallax offsetPx={14} className="w-full">
                   <ImageReveal className="w-full">
-                    <img
-                      src="/assets/ref/about-imac.png"
-                      alt="Manisha Graphix Prepress Studio Workspace"
-                      className="w-full h-auto object-cover scale-[1.03] transition-transform duration-700 ease-out group-hover:scale-[1.06]"
-                    />
+                    <picture className="block w-full">
+                      <source srcSet="/assets/ref/about-imac.webp" type="image/webp" />
+                      <img
+                        src="/assets/ref/about-imac.png"
+                        width={420}
+                        height={190}
+                        loading="lazy"
+                        decoding="async"
+                        alt="Manisha Graphix Prepress Studio Workspace in Vadodara"
+                        className="w-full h-auto object-cover scale-[1.03] transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+                      />
+                    </picture>
                   </ImageReveal>
                 </SubtleParallax>
                 <div className="p-3 bg-neutral-900 text-white text-[11px] font-mono flex items-center justify-between relative z-10">
@@ -184,7 +191,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenQuoteModal }) => {
               <div className="space-y-1">
                 <Reveal distance={14} duration={0.55}>
                   <span className="text-xs font-mono font-bold text-[#FF0000] uppercase tracking-wider">
-                    FOUNDER'S AND CEO
+                    FOUNDER & CEO
                   </span>
                 </Reveal>
                 <MaskedTextReveal delay={0.08}>
@@ -379,6 +386,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenQuoteModal }) => {
 
               <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
                 <motion.button
+                  type="button"
                   whileHover={{ y: -1.5 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ duration: 0.24, ease: EASE_STUDIO }}
@@ -389,6 +397,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenQuoteModal }) => {
                   <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
                 </motion.button>
                 <motion.button
+                  type="button"
                   whileHover={{ y: -1.5 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ duration: 0.24, ease: EASE_STUDIO }}
@@ -405,7 +414,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenQuoteModal }) => {
       </section>
 
       {/* 4. Emblem Anatomy & Meaning (BRAND IDENTITY) */}
-      <section className="py-16 sm:py-20 lg:py-24 bg-white dark:bg-[#0c0c12] text-neutral-900 dark:text-neutral-100 relative overflow-hidden border-t border-neutral-200/90 dark:border-neutral-800 transition-colors duration-300">
+      <section className="pt-16 sm:pt-20 lg:pt-24 pb-12 sm:pb-14 lg:pb-16 bg-white dark:bg-[#0c0c12] text-neutral-900 dark:text-neutral-100 relative overflow-hidden border-t border-neutral-200/90 dark:border-neutral-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="max-w-2xl mb-10 sm:mb-12 lg:mb-14">
             <Reveal distance={14} duration={0.55}>
@@ -485,8 +494,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenQuoteModal }) => {
               <h3 className="text-xl sm:text-2xl font-bold uppercase font-display">Ready to discuss your custom print specifications?</h3>
               <p className="text-xs sm:text-sm text-neutral-400 mt-1.5">Our team provides physical sample paper swatches and instantaneous quotes.</p>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
               <motion.button
+                type="button"
                 whileHover={{ y: -1.5 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.24, ease: EASE_STUDIO }}
@@ -496,6 +506,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onOpenQuoteModal }) => {
                 Instant Quote
               </motion.button>
               <motion.button
+                type="button"
                 whileHover={{ y: -1.5 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.24, ease: EASE_STUDIO }}

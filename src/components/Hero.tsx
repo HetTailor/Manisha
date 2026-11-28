@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, FileText, Heart, Plus, BookOpen } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import heroFullBg from '../assets/images/hero_full_background_1795019097178.jpg';
+import heroFullBgWebp from '../assets/images/hero_full_background_1795019097178.webp';
 
 // Refined Cinematic Easing Curve (Smooth editorial deceleration, zero bounce)
 const EASE_EDITORIAL: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -48,13 +49,21 @@ export const Hero: React.FC<HeroProps> = ({
       {/* Static Full-Bleed Studio Background Image (No movement, zoom, scaling, or panning) */}
       <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
         {!bgError ? (
-          <img
-            src={heroFullBg}
-            onError={() => setBgError(true)}
-            referrerPolicy="no-referrer"
-            alt="Manisha Graphix commercial printing and design showcase background"
-            className="w-full h-full object-cover object-[78%_center] sm:object-[70%_center] lg:object-center"
-          />
+          <picture className="block w-full h-full">
+            <source srcSet={heroFullBgWebp} type="image/webp" />
+            <img
+              src={heroFullBg}
+              width={1376}
+              height={768}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              onError={() => setBgError(true)}
+              referrerPolicy="no-referrer"
+              alt="Manisha Graphix commercial printing and design showcase background"
+              className="w-full h-full object-cover object-[78%_center] sm:object-[70%_center] lg:object-center"
+            />
+          </picture>
         ) : (
           <div aria-hidden="true" className="w-full h-full bg-[#000000]" />
         )}
